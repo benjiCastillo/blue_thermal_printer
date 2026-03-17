@@ -6,6 +6,10 @@ Flutter plugin for connecting to Bluetooth thermal printers from Android.
 
 This is a fork prepared for modern Flutter/Dart projects and future publication under the package name `blue_thermal_printer_benji`.
 
+Original upstream project:
+
+- `https://github.com/kakzaki/blue_thermal_printer`
+
 ## Current Status
 
 This package is **not published on pub.dev yet**.
@@ -18,6 +22,7 @@ For now, use it in one of these ways:
 ## Repository
 
 - Fork: `https://github.com/benjiCastillo/blue_thermal_printer`
+- Upstream: `https://github.com/kakzaki/blue_thermal_printer`
 - Issues: `https://github.com/benjiCastillo/blue_thermal_printer/issues`
 - X: `https://x.com/benji_ce`
 
