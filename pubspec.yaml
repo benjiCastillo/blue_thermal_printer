@@ -1,4 +1,4 @@
-name: blue_thermal_printer
+name: blue_thermal_printer_benji
 description: A Flutter plugin for connecting to thermal printer via bluetooth
 version: 1.3.0
 homepage: https://github.com/benjiCastillo/blue_thermal_printer

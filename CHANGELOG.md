@@ -1,4 +1,5 @@
 ## 1.3.0
+* rename package to `blue_thermal_printer_benji` for future pub.dev publishing
 * update package metadata to the benjiCastillo fork
 * refresh README with installation and testing steps
 * add Zebra ZQ521 CPCL example flow in the demo app

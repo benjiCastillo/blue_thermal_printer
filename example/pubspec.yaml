@@ -1,6 +1,6 @@
 name: blue_thermal_printer_example
-description: Demonstrates how to use the blue_thermal_printer plugin.
-publish_to: https://pub.dev/packages/blue_thermal_printer
+description: Demonstrates how to use the blue_thermal_printer_benji plugin.
+publish_to: none
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -8,7 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  blue_thermal_printer:
+  blue_thermal_printer_benji:
     path: ../
 
   # The following adds the Cupertino Icons font to your application.

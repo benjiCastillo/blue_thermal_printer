@@ -1,7 +1,7 @@
 import 'dart:convert' show Latin1Encoder;
 import 'dart:typed_data';
 
-import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+import 'package:blue_thermal_printer_benji/blue_thermal_printer.dart';
 
 /// Zebra CPCL test layout using a compact coordinate system similar to the sample.
 class TestPrint {
