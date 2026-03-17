@@ -1,138 +1,185 @@
+import 'dart:convert' show Latin1Encoder;
 import 'dart:typed_data';
-import 'package:blue_thermal_printer_example/printerenum.dart';
-import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
+
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
-import 'dart:io';
-import 'package:http/http.dart' as http;
 
-///Test printing
+/// Zebra CPCL test layout using a compact coordinate system similar to the sample.
 class TestPrint {
-  BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
+  final BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
 
-  sample() async {
-    //image max 300px X 300px
+  Future<void> sample() async {
+    final bool? isConnected = await bluetooth.isConnected;
+    if (isConnected != true) {
+      return;
+    }
 
-    ///image from File path
-    String filename = 'yourlogo.png';
-    ByteData bytesData = await rootBundle.load("assets/images/yourlogo.png");
-    String dir = (await getApplicationDocumentsDirectory()).path;
-    File file = await File('$dir/$filename').writeAsBytes(bytesData.buffer
-        .asUint8List(bytesData.offsetInBytes, bytesData.lengthInBytes));
+    const String cpcl = '''
+LABEL
+ENCODING UTF-8
+CONTRAST 0
+TONE 0
+SPEED 3
+PAGE-WIDTH 800
+BAR-SENSE
+CENTER
+T 4 1 8 4 E.L.A.P.A.S
+T 7 1 8 104 EMPRESA LOCAL DE AGUA POTABLE Y ALCANTARILLADO SUCRE
+LEFT
+T 7 0 8 156 NRO AVISO: JR-6938020
+T 7 0 450 156 NO VALIDO PARA CREDITO FISCAL
 
-    ///image from Asset
-    ByteData bytesAsset = await rootBundle.load("assets/images/yourlogo.png");
-    Uint8List imageBytesFromAsset = bytesAsset.buffer
-        .asUint8List(bytesAsset.offsetInBytes, bytesAsset.lengthInBytes);
+T 7 0 590 8 CODIGO USUARIO
+IL 580 7 785 7 22
+B 128 0 0 40 605 35 411780450
+BT OFF
+T 7 0 610 75 411780450
 
-    ///image from Network
-    var response = await http.get(Uri.parse(
-        "https://raw.githubusercontent.com/kakzaki/blue_thermal_printer/master/example/assets/images/yourlogo.png"));
-    Uint8List bytesNetwork = response.bodyBytes;
-    Uint8List imageBytesFromNetwork = bytesNetwork.buffer
-        .asUint8List(bytesNetwork.offsetInBytes, bytesNetwork.lengthInBytes);
+T 7 1 20 200 NOMBRE:
+T 7 1 160 200 QUISPE ORTEGA LUCIO MARCELO
+T 7 1 20 250 DIRECCION:
+T 7 1 160 250 BARRIO SOCABON S/N
+T 7 1 20 300 CATEGORIA:
+T 7 1 160 300 DOMESTICO
+T 7 1 20 350 FECHA Y HORA: 09/03/2026 08:06:39
+T 7 1 480 350 COD. CLIENTE:
+T 7 1 480 300 NRO MEDIDOR:
+RIGHT 780
+T 7 1 0 300 111383
+T 7 1 0 350 411780450
+LEFT
 
-    bluetooth.isConnected.then((isConnected) {
-      if (isConnected == true) {
-        bluetooth.printNewLine();
-        bluetooth.printCustom("HEADER", Size.boldMedium.val, Align.center.val);
-        bluetooth.printNewLine();
-        bluetooth.printImage(file.path); //path of your image/logo
-        bluetooth.printNewLine();
-        bluetooth.printImageBytes(imageBytesFromAsset); //image from Asset
-        bluetooth.printNewLine();
-        bluetooth.printImageBytes(imageBytesFromNetwork); //image from Network
-        bluetooth.printNewLine();
-        bluetooth.printLeftRight("LEFT", "RIGHT", Size.medium.val);
-        bluetooth.printLeftRight("LEFT", "RIGHT", Size.bold.val);
-        bluetooth.printLeftRight("LEFT", "RIGHT", Size.bold.val,
-            format:
-                "%-15s %15s %n"); //15 is number off character from left or right
-        bluetooth.printNewLine();
-        bluetooth.printLeftRight("LEFT", "RIGHT", Size.boldMedium.val);
-        bluetooth.printLeftRight("LEFT", "RIGHT", Size.boldLarge.val);
-        bluetooth.printLeftRight("LEFT", "RIGHT", Size.extraLarge.val);
-        bluetooth.printNewLine();
-        bluetooth.print3Column("Col1", "Col2", "Col3", Size.bold.val);
-        bluetooth.print3Column("Col1", "Col2", "Col3", Size.bold.val,
-            format:
-                "%-10s %10s %10s %n"); //10 is number off character from left center and right
-        bluetooth.printNewLine();
-        bluetooth.print4Column("Col1", "Col2", "Col3", "Col4", Size.bold.val);
-        bluetooth.print4Column("Col1", "Col2", "Col3", "Col4", Size.bold.val,
-            format: "%-8s %7s %7s %7s %n");
-        bluetooth.printNewLine();
-        bluetooth.printCustom("čĆžŽšŠ-H-ščđ", Size.bold.val, Align.center.val,
-            charset: "windows-1250");
-        bluetooth.printLeftRight("Številka:", "18000001", Size.bold.val,
-            charset: "windows-1250");
-        bluetooth.printCustom("Body left", Size.bold.val, Align.left.val);
-        bluetooth.printCustom("Body right", Size.medium.val, Align.right.val);
-        bluetooth.printNewLine();
-        bluetooth.printCustom("Thank You", Size.bold.val, Align.center.val);
-        bluetooth.printNewLine();
-        bluetooth.printQRcode(
-            "Insert Your Own Text to Generate", 200, 200, Align.center.val);
-        bluetooth.printNewLine();
-        bluetooth.printNewLine();
-        bluetooth
-            .paperCut(); //some printer not supported (sometime making image not centered)
-        //bluetooth.drawerPin2(); // or you can use bluetooth.drawerPin5();
-      }
-    });
+BOX 4 190 796 400 2
+IL 15 205 105 205 36
+IL 15 255 140 255 36
+IL 15 305 140 305 36
+IL 470 305 640 305 38
+IL 470 354 640 354 38
+
+T 7 0 15 420 FECHA LECTURA ACTUAL:
+T 7 0 15 460 FECHA LECTURA ANTERIOR:
+T 7 0 15 500 NRO DIAS DE CONSUMO:
+T 7 0 15 540 AVISO POR EL MES DE:
+T 7 0 445 420 LECTURA ACTUAL:
+T 7 0 445 460 LECTURA ANTERIOR:
+T 7 0 445 500 CONSUMO M3(cubos):
+T 7 0 445 540 FECHA VENCIMIENTO:
+RIGHT 430
+T 7 0 0 420 09/03/2026
+T 7 0 0 460 09/02/2026
+T 7 0 0 500 28
+T 7 0 0 540 MAR-2026
+RIGHT 790
+T 7 0 0 420 1327
+T 7 0 0 460 1301
+T 7 0 0 500 26.0
+T 7 0 0 540 08/04/2026
+LEFT
+
+BOX 4 410 796 570 2
+LINE 4 450 796 450 1
+LINE 4 490 796 490 1
+LINE 4 530 796 530 1
+LINE 295 410 295 570 1
+LINE 435 410 435 570 1
+LINE 660 410 660 570 1
+IL 12 538 260 538 25
+IL 305 538 432 538 25
+
+T 7 0 40 590 MES
+T 7 0 130 590 m3
+T 7 0 200 590 IMP. Bs.
+
+T 7 0 15 630 Feb-26
+RIGHT 160
+T 7 0 0 630 28
+RIGHT 290
+T 7 0 0 630 186.0
+
+LEFT
+T 7 0 15 670 Ene-26
+RIGHT 160
+T 7 0 0 670 30
+RIGHT 290
+T 7 0 0 670 201.2
+
+LEFT
+T 7 0 15 710 Dic-25
+RIGHT 160
+T 7 0 0 710 31
+RIGHT 290
+T 7 0 0 710 214.6
+
+LEFT
+T 7 0 15 750 Nov-25
+RIGHT 160
+T 7 0 0 750 31
+RIGHT 290
+T 7 0 0 750 210.9
+
+LEFT
+T 7 0 15 790 Oct-25
+RIGHT 160
+T 7 0 0 790 34
+RIGHT 290
+T 7 0 0 790 255.5
+
+LEFT
+T 7 0 15 830 Sep-25
+RIGHT 160
+T 7 0 0 830 31
+RIGHT 290
+T 7 0 0 830 203.3
+
+LEFT
+T 7 0 20 870 PROMEDIO M3:
+RIGHT 290
+T 7 0 0 870 31
+
+LEFT
+BOX 4 580 310 900 2
+LINE 4 620 310 620 1
+LINE 4 860 310 860 1
+LINE 100 580 100 860 1
+LINE 180 580 180 860 1
+IL 25 588 90 588 25
+IL 120 588 160 588 25
+IL 195 588 295 588 25
+IL 15 868 165 868 25
+
+T 7 0 388 590 DESCRIPCION
+T 7 0 636 590 IMPORTE Bs.
+T 7 0 340 640 AGUA Y ALCANTARILLADO
+RIGHT 780
+T 7 0 0 640 172.00
+
+LEFT
+T 7 1 350 845 TOTAL IMPORTE DEL MES
+RIGHT 780
+T 7 1 0 845 172.00
+LEFT
+BOX 320 580 796 900 2
+LINE 320 620 796 620 1
+IL 380 588 525 588 25
+IL 635 588 765 588 25
+IL 340 848 610 848 40
+
+T 7 1 35 930 OBSERVACION
+T 7 1 200 930 CONSUMO NORMAL
+BOX 4 925 796 980 2
+IL 15 933 185 933 40
+
+CENTER
+T 7 1 0 1010 PARA MAYOR INFORMACION COMUNIQUESE CON 6461919 INT 105
+IL 0 1013 800 1013 92
+T 7 0 0 1080 POR UNA SOCIEDAD LIBRE DE DROGAS
+T 7 0 0 1115 DENUNCIA A LA LINEA GRATUITA
+PRINT
+''';
+
+    final Uint8List data = Uint8List.fromList(
+      const Latin1Encoder().convert('! 0 200 200 1180 1 \r\n$cpcl'),
+    );
+    await bluetooth.writeBytes(data);
+    await bluetooth.printNewLine();
   }
-
-//   sample(String pathImage) async {
-//     //SIZE
-//     // 0- normal size text
-//     // 1- only bold text
-//     // 2- bold with medium text
-//     // 3- bold with large text
-//     //ALIGN
-//     // 0- ESC_ALIGN_LEFT
-//     // 1- ESC_ALIGN_CENTER
-//     // 2- ESC_ALIGN_RIGHT
-//
-// //     var response = await http.get("IMAGE_URL");
-// //     Uint8List bytes = response.bodyBytes;
-//     bluetooth.isConnected.then((isConnected) {
-//       if (isConnected == true) {
-//         bluetooth.printNewLine();
-//         bluetooth.printCustom("HEADER", 3, 1);
-//         bluetooth.printNewLine();
-//         bluetooth.printImage(pathImage); //path of your image/logo
-//         bluetooth.printNewLine();
-// //      bluetooth.printImageBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-//         bluetooth.printLeftRight("LEFT", "RIGHT", 0);
-//         bluetooth.printLeftRight("LEFT", "RIGHT", 1);
-//         bluetooth.printLeftRight("LEFT", "RIGHT", 1, format: "%-15s %15s %n");
-//         bluetooth.printNewLine();
-//         bluetooth.printLeftRight("LEFT", "RIGHT", 2);
-//         bluetooth.printLeftRight("LEFT", "RIGHT", 3);
-//         bluetooth.printLeftRight("LEFT", "RIGHT", 4);
-//         bluetooth.printNewLine();
-//         bluetooth.print3Column("Col1", "Col2", "Col3", 1);
-//         bluetooth.print3Column("Col1", "Col2", "Col3", 1,
-//             format: "%-10s %10s %10s %n");
-//         bluetooth.printNewLine();
-//         bluetooth.print4Column("Col1", "Col2", "Col3", "Col4", 1);
-//         bluetooth.print4Column("Col1", "Col2", "Col3", "Col4", 1,
-//             format: "%-8s %7s %7s %7s %n");
-//         bluetooth.printNewLine();
-//         String testString = " čĆžŽšŠ-H-ščđ";
-//         bluetooth.printCustom(testString, 1, 1, charset: "windows-1250");
-//         bluetooth.printLeftRight("Številka:", "18000001", 1,
-//             charset: "windows-1250");
-//         bluetooth.printCustom("Body left", 1, 0);
-//         bluetooth.printCustom("Body right", 0, 2);
-//         bluetooth.printNewLine();
-//         bluetooth.printCustom("Thank You", 2, 1);
-//         bluetooth.printNewLine();
-//         bluetooth.printQRcode("Insert Your Own Text to Generate", 200, 200, 1);
-//         bluetooth.printNewLine();
-//         bluetooth.printNewLine();
-//         bluetooth.paperCut();
-//       }
-//     });
-//   }
 }

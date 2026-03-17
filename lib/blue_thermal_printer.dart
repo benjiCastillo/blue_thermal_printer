@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -18,17 +17,14 @@ class BlueThermalPrinter {
 
   static const String namespace = 'blue_thermal_printer';
 
-  static const MethodChannel _channel =
-      const MethodChannel('$namespace/methods');
+  static const MethodChannel _channel = MethodChannel('$namespace/methods');
 
-  static const EventChannel _readChannel =
-      const EventChannel('$namespace/read');
+  static const EventChannel _readChannel = EventChannel('$namespace/read');
 
-  static const EventChannel _stateChannel =
-      const EventChannel('$namespace/state');
+  static const EventChannel _stateChannel = EventChannel('$namespace/state');
 
   final StreamController<MethodCall> _methodStreamController =
-      new StreamController.broadcast();
+      StreamController<MethodCall>.broadcast();
 
   //Stream<MethodCall> get _methodStream => _methodStreamController.stream;
 
@@ -38,7 +34,7 @@ class BlueThermalPrinter {
     });
   }
 
-  static BlueThermalPrinter _instance = new BlueThermalPrinter._();
+  static final BlueThermalPrinter _instance = BlueThermalPrinter._();
 
   static BlueThermalPrinter get instance => _instance;
 
@@ -66,7 +62,9 @@ class BlueThermalPrinter {
 
   ///getBondedDevices()
   Future<List<BluetoothDevice>> getBondedDevices() async {
-    final List list = await (_channel.invokeMethod('getBondedDevices'));
+    final List<dynamic> list =
+        await _channel.invokeMethod<List<dynamic>>('getBondedDevices') ??
+            <dynamic>[];
     return list.map((map) => BluetoothDevice.fromMap(map)).toList();
   }
 
@@ -176,20 +174,20 @@ class BluetoothDevice {
 
   BluetoothDevice(this.name, this.address);
 
-  BluetoothDevice.fromMap(Map map)
+  BluetoothDevice.fromMap(Map<dynamic, dynamic> map)
       : name = map['name'],
         address = map['address'];
 
   Map<String, dynamic> toMap() => {
-        'name': this.name,
-        'address': this.address,
-        'type': this.type,
-        'connected': this.connected,
+        'name': name,
+        'address': address,
+        'type': type,
+        'connected': connected,
       };
 
-  operator ==(Object other) {
-    return other is BluetoothDevice && other.address == this.address;
-  }
+  @override
+  bool operator ==(Object other) =>
+      other is BluetoothDevice && other.address == address;
 
   @override
   int get hashCode => address.hashCode;

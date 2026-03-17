@@ -2,7 +2,6 @@ package id.kakzaki.blue_thermal_printer;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -58,6 +57,7 @@ public class BlueThermalPrinterPlugin implements FlutterPlugin, ActivityAware,Me
 
   private static final String TAG = "BThermalPrinterPlugin";
   private static final String NAMESPACE = "blue_thermal_printer";
+  private static final int REQUEST_BLUETOOTH_PERMISSIONS = 1450;
   private static final int REQUEST_COARSE_LOCATION_PERMISSIONS = 1451;
   private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
   private static ConnectedThread THREAD = null;
@@ -97,7 +97,7 @@ public class BlueThermalPrinterPlugin implements FlutterPlugin, ActivityAware,Me
     activityBinding = binding;
     setup(
             pluginBinding.getBinaryMessenger(),
-            (Application) pluginBinding.getApplicationContext(),
+            pluginBinding.getApplicationContext(),
             activityBinding.getActivity(),
             activityBinding);
   }
@@ -119,20 +119,21 @@ public class BlueThermalPrinterPlugin implements FlutterPlugin, ActivityAware,Me
 
   private void setup(
           final BinaryMessenger messenger,
-          final Application application,
+          final Context applicationContext,
           final Activity activity,
           final ActivityPluginBinding activityBinding) {
     synchronized (initializationLock) {
       Log.i(TAG, "setup");
       this.activity = activity;
-      this.context = application;
+      this.context = applicationContext;
       channel = new MethodChannel(messenger, NAMESPACE + "/methods");
       channel.setMethodCallHandler(this);
       stateChannel = new EventChannel(messenger, NAMESPACE + "/state");
       stateChannel.setStreamHandler(stateStreamHandler);
       EventChannel readChannel = new EventChannel(messenger, NAMESPACE + "/read");
       readChannel.setStreamHandler(readResultsHandler);
-      mBluetoothManager = (BluetoothManager) application.getSystemService(Context.BLUETOOTH_SERVICE);
+      mBluetoothManager =
+              (BluetoothManager) applicationContext.getSystemService(Context.BLUETOOTH_SERVICE);
       mBluetoothAdapter = mBluetoothManager.getAdapter();
       activityBinding.addRequestPermissionsResultListener(this);
     }
@@ -142,12 +143,19 @@ public class BlueThermalPrinterPlugin implements FlutterPlugin, ActivityAware,Me
   private void detach() {
     Log.i(TAG, "detach");
     context = null;
-    activityBinding.removeRequestPermissionsResultListener(this);
+    activity = null;
+    if (activityBinding != null) {
+      activityBinding.removeRequestPermissionsResultListener(this);
+    }
     activityBinding = null;
-    channel.setMethodCallHandler(null);
-    channel = null;
-    stateChannel.setStreamHandler(null);
-    stateChannel = null;
+    if (channel != null) {
+      channel.setMethodCallHandler(null);
+      channel = null;
+    }
+    if (stateChannel != null) {
+      stateChannel.setStreamHandler(null);
+      stateChannel = null;
+    }
     mBluetoothAdapter = null;
     mBluetoothManager = null;
   }
@@ -241,7 +249,7 @@ public class BlueThermalPrinterPlugin implements FlutterPlugin, ActivityAware,Me
                       Manifest.permission.BLUETOOTH_SCAN,
                       Manifest.permission.BLUETOOTH_CONNECT,
                       Manifest.permission.ACCESS_FINE_LOCATION,
-              }, 1);
+              }, REQUEST_BLUETOOTH_PERMISSIONS);
 
               pendingResult = result;
               break;
@@ -407,14 +415,22 @@ public class BlueThermalPrinterPlugin implements FlutterPlugin, ActivityAware,Me
    */
   @Override
   public boolean onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    if (requestCode == REQUEST_COARSE_LOCATION_PERMISSIONS || requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
+      if (pendingResult == null) {
+        return false;
+      }
 
-    if (requestCode == REQUEST_COARSE_LOCATION_PERMISSIONS) {
-      if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+      boolean granted = grantResults.length > 0;
+      for (int grantResult : grantResults) {
+        granted &= grantResult == PackageManager.PERMISSION_GRANTED;
+      }
+
+      if (granted) {
         getBondedDevices(pendingResult);
       } else {
-        pendingResult.error("no_permissions", "this plugin requires location permissions for scanning", null);
-        pendingResult = null;
+        pendingResult.error("no_permissions", "this plugin requires bluetooth permissions to list paired devices", null);
       }
+      pendingResult = null;
       return true;
     }
     return false;
@@ -440,7 +456,7 @@ public class BlueThermalPrinterPlugin implements FlutterPlugin, ActivityAware,Me
           break;
       }
     } catch (SecurityException e) {
-      result.error("invalid_argument", "Argument 'address' not found", null);
+      result.error("permission_error", "Bluetooth permission not granted", null);
     }
   }
 

@@ -1,23 +1,26 @@
+import 'dart:async';
+
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:blue_thermal_printer_example/testprint.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/services.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
-  _MyAppState createState() => new _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
+  final BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
 
-  List<BluetoothDevice> _devices = [];
+  List<BluetoothDevice> _devices = <BluetoothDevice>[];
   BluetoothDevice? _device;
   bool _connected = false;
-  TestPrint testPrint = TestPrint();
+  final TestPrint testPrint = TestPrint();
 
   @override
   void initState() {
@@ -50,53 +53,53 @@ class _MyAppState extends State<MyApp> {
         case BlueThermalPrinter.CONNECTED:
           setState(() {
             _connected = true;
-            print("bluetooth device state: connected");
+            debugPrint('bluetooth device state: connected');
           });
           break;
         case BlueThermalPrinter.DISCONNECTED:
           setState(() {
             _connected = false;
-            print("bluetooth device state: disconnected");
+            debugPrint('bluetooth device state: disconnected');
           });
           break;
         case BlueThermalPrinter.DISCONNECT_REQUESTED:
           setState(() {
             _connected = false;
-            print("bluetooth device state: disconnect requested");
+            debugPrint('bluetooth device state: disconnect requested');
           });
           break;
         case BlueThermalPrinter.STATE_TURNING_OFF:
           setState(() {
             _connected = false;
-            print("bluetooth device state: bluetooth turning off");
+            debugPrint('bluetooth device state: bluetooth turning off');
           });
           break;
         case BlueThermalPrinter.STATE_OFF:
           setState(() {
             _connected = false;
-            print("bluetooth device state: bluetooth off");
+            debugPrint('bluetooth device state: bluetooth off');
           });
           break;
         case BlueThermalPrinter.STATE_ON:
           setState(() {
             _connected = false;
-            print("bluetooth device state: bluetooth on");
+            debugPrint('bluetooth device state: bluetooth on');
           });
           break;
         case BlueThermalPrinter.STATE_TURNING_ON:
           setState(() {
             _connected = false;
-            print("bluetooth device state: bluetooth turning on");
+            debugPrint('bluetooth device state: bluetooth turning on');
           });
           break;
         case BlueThermalPrinter.ERROR:
           setState(() {
             _connected = false;
-            print("bluetooth device state: error");
+            debugPrint('bluetooth device state: error');
           });
           break;
         default:
-          print(state);
+          debugPrint('$state');
           break;
       }
     });
@@ -137,7 +140,9 @@ class _MyAppState extends State<MyApp> {
                   ),
                   const SizedBox(width: 30),
                   Expanded(
-                    child: DropdownButton(
+                    child: DropdownButton<BluetoothDevice>(
+                      isExpanded: true,
+                      hint: const Text('Select a device'),
                       items: _getDeviceItems(),
                       onChanged: (BluetoothDevice? value) =>
                           setState(() => _device = value),
@@ -152,7 +157,9 @@ class _MyAppState extends State<MyApp> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(primary: Colors.brown),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                    ),
                     onPressed: () {
                       initPlatformState();
                     },
@@ -164,7 +171,8 @@ class _MyAppState extends State<MyApp> {
                   const SizedBox(width: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        primary: _connected ? Colors.red : Colors.green),
+                      backgroundColor: _connected ? Colors.red : Colors.green,
+                    ),
                     onPressed: _connected ? _disconnect : _connect,
                     child: Text(
                       _connected ? 'Disconnect' : 'Connect',
@@ -177,7 +185,9 @@ class _MyAppState extends State<MyApp> {
                 padding:
                     const EdgeInsets.only(left: 10.0, right: 10.0, top: 50),
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(primary: Colors.brown),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.brown,
+                  ),
                   onPressed: () {
                     testPrint.sample();
                   },
@@ -193,20 +203,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   List<DropdownMenuItem<BluetoothDevice>> _getDeviceItems() {
-    List<DropdownMenuItem<BluetoothDevice>> items = [];
-    if (_devices.isEmpty) {
-      items.add(DropdownMenuItem(
-        child: Text('NONE'),
-      ));
-    } else {
-      _devices.forEach((device) {
-        items.add(DropdownMenuItem(
-          child: Text(device.name ?? ""),
-          value: device,
-        ));
-      });
-    }
-    return items;
+    return _devices
+        .map(
+          (BluetoothDevice device) => DropdownMenuItem<BluetoothDevice>(
+            value: device,
+            child: Text(device.name ?? ''),
+          ),
+        )
+        .toList();
   }
 
   void _connect() {
@@ -231,9 +235,9 @@ class _MyAppState extends State<MyApp> {
 
   Future show(
     String message, {
-    Duration duration: const Duration(seconds: 3),
+    Duration duration = const Duration(seconds: 3),
   }) async {
-    await new Future.delayed(new Duration(milliseconds: 100));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

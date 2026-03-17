@@ -13,35 +13,19 @@ enum Align {
 }
 
 extension PrintSize on Size {
-  int get val {
-    switch (this) {
-      case Size.medium:
-        return 0;
-      case Size.bold:
-        return 1;
-      case Size.boldMedium:
-        return 2;
-      case Size.boldLarge:
-        return 3;
-      case Size.extraLarge:
-        return 4;
-      default:
-        return 0;
-    }
-  }
+  int get val => switch (this) {
+        Size.medium => 0,
+        Size.bold => 1,
+        Size.boldMedium => 2,
+        Size.boldLarge => 3,
+        Size.extraLarge => 4,
+      };
 }
 
 extension PrintAlign on Align {
-  int get val {
-    switch (this) {
-      case Align.left:
-        return 0;
-      case Align.center:
-        return 1;
-      case Align.right:
-        return 2;
-      default:
-        return 0;
-    }
-  }
+  int get val => switch (this) {
+        Align.left => 0,
+        Align.center => 1,
+        Align.right => 2,
+      };
 }

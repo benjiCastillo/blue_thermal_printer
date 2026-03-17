@@ -1,3 +1,9 @@
+## 1.2.4
+* add Dart 3 and recent Flutter SDK constraints
+* update Android and example Gradle configuration for current Flutter tooling
+* refresh example iOS CocoaPods setup and deployment targets
+* fix method channel test setup and minor compatibility issues
+
 ## 1.2.3
 * demonstrate using enum for readability
 * drawer pin by erica
