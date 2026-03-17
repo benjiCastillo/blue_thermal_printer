@@ -1,3 +1,8 @@
+## 1.3.0
+* update package metadata to the benjiCastillo fork
+* refresh README with installation and testing steps
+* add Zebra ZQ521 CPCL example flow in the demo app
+
 ## 1.2.4
 * add Dart 3 and recent Flutter SDK constraints
 * update Android and example Gradle configuration for current Flutter tooling

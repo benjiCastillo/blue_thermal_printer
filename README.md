@@ -1,62 +1,140 @@
 # blue_thermal_printer
 
-
 [![pub package](https://img.shields.io/pub/v/blue_thermal_printer.svg)](https://pub.dev/packages/blue_thermal_printer)
-[![pub package](https://img.shields.io/twitter/follow/kakzaki_id.svg?colorA=1da1f2&colorB=&label=Follow%20on%20Twitter)](https://twitter.com/kakzaki_id)
+[![X Follow](https://img.shields.io/badge/X-@benji__ce-111111?logo=x&logoColor=white)](https://x.com/benji_ce)
 
-A new Flutter plugin for connecting to thermal printer via bluetooth
-(Android Only),
-this plugin is still under development
-Note: Migrate your project to AndroidX
+Flutter plugin for connecting to Bluetooth thermal printers from Android.
 
+This fork updates the package for recent Flutter and Dart versions and includes a demo flow for Zebra ZQ521 using CPCL.
 
 ## Platform Support
 
-| Android | iOS | MacOS | Web | Linux | Windows |
-| :-----: | :-: | :---: | :-: | :---: | :-----: |
-|   ✔️    | ️X  |  ️X   | ️X  |  ️X   |   ️X    |
+| Android | iOS | macOS | Web | Linux | Windows |
+| :-----: | :--: | :---: | :-: | :---: | :-----: |
+|   ✔️    |  stub |  stub |  ✘  |   ✘   |   ✘    |
 
+## Repository
 
+- Fork: `https://github.com/benjiCastillo/blue_thermal_printer`
+- Issues: `https://github.com/benjiCastillo/blue_thermal_printer/issues`
+- X: `https://x.com/benji_ce`
 
-## Getting Started
+## Requirements
 
-1. Depend on it
+- Flutter `>=3.24.0`
+- Dart `>=3.3.0 <4.0.0`
+- Android device with Bluetooth
+- For Zebra printers, test with a paired device such as `Zebra ZQ521`
 
-Add this to your package's pubspec.yaml file:
+## Installation
 
-    dependencies:
-      blue_thermal_printer: ^any
+Add the dependency to your `pubspec.yaml`:
 
-2. Install it
+```yaml
+dependencies:
+  blue_thermal_printer: ^1.3.0
+```
 
-You can install packages from the command line:
+Then install packages:
 
-with Flutter:
+```bash
+flutter pub get
+```
 
-    $ flutter packages get
+Import it in Dart:
 
-Alternatively, your editor might support flutter packages get. Check the docs for your editor to learn more.
+```dart
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+```
 
+## Local Fork Usage
 
-3. Import it
+If you want to test this fork directly from a local checkout:
 
-Now in your Dart code, you can use:
+```yaml
+dependencies:
+  blue_thermal_printer:
+    path: ../blue_thermal_printer
+```
 
-     import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+## How To Test The Example
 
+1. Clone the fork:
 
-EXAMPLE:
+```bash
+git clone git@github.com:benjiCastillo/blue_thermal_printer.git
+cd blue_thermal_printer
+```
 
-For detail demonstration please look at [example](https://github.com/kakzaki/blue_thermal_printer/tree/master/example) folder
+2. Install dependencies for the package and the example:
 
-Note: make sure to upgrade your project to compileSdkVersion 31 or above
+```bash
+flutter pub get
+cd example
+flutter pub get
+```
 
-If you like my content, please consider buying me a coffee. Thank you for your support!
+3. Verify your device:
 
-<a href="https://www.buymeacoffee.com/QP1rCmf5L" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+```bash
+flutter devices
+```
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z6656JW)
+4. Run the example on Android:
 
-bagi yang dari Indonesia bisa lewat saweria berikut
+```bash
+flutter run -d <device-id>
+```
 
-https://saweria.co/kakzaki
+Example:
+
+```bash
+flutter run -d R9WNB0K0KKJ
+```
+
+5. In the example app:
+
+- Tap `Refresh`
+- Select the paired printer
+- Tap `Connect`
+- Tap `PRINT TEST`
+
+## Zebra ZQ521 Notes
+
+The demo in [`example/lib/testprint.dart`](/home/benji/Documents/projects/epsas/blue_thermal_printer/example/lib/testprint.dart) is currently tailored to Zebra ZQ521 with `CPCL`.
+
+Important points:
+
+- `ZPL` printed garbage on the tested channel
+- `CPCL` printed correctly
+- The sample receipt is built as a CPCL layout using `LABEL`, `TEXT`, `BOX`, `LINE`, `IL`, barcode, and `PRINT`
+
+If you are using another printer brand, you may need to replace the example print flow with commands that match that printer language.
+
+## Validation
+
+To validate the package locally:
+
+```bash
+flutter analyze
+flutter test
+```
+
+To validate the example:
+
+```bash
+cd example
+flutter analyze
+flutter test
+```
+
+## Notes
+
+- The Android implementation is the primary supported target
+- iOS and macOS plugin code remain minimal stubs in this fork
+- On Android 12+, Bluetooth permissions must be granted
+- For modern Flutter projects, use recent Android Gradle Plugin and SDK versions
+
+## Credits
+
+This project is based on the original `blue_thermal_printer` package and adapted in this fork for current Flutter/Dart compatibility and Zebra testing.
